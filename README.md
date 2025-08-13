@@ -74,7 +74,11 @@ uv run python baselines/training/evaluation.py
 ```
 
 ## References
-List any sources used in developing your model (e.g., baseline model that was fine-tuned).
+Baselines built of of BioCLIPv2 and Dinov2:
+
+Gu, Jianyang, et al. "Bioclip 2: Emergent properties from scaling hierarchical contrastive learning." arXiv preprint arXiv:2505.23883 (2025).
+
+Oquab, Maxime, et al. "Dinov2: Learning robust visual features without supervision." arXiv preprint arXiv:2304.07193 (2023).
 
 [Sample repo from Y1 challenge](https://github.com/Imageomics/HDR-anomaly-challenge-sample).
 

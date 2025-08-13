@@ -4,38 +4,40 @@ The ingestion program will call `predict` to get a prediction for each test imag
 - predict: uses the model to perform predictions.
 - load: reloads the model.
 '''
-import os
 import torch
+import os
+from transformers import AutoModel, AutoImageProcessor
 import torch.nn as nn
-from open_clip import create_model_and_transforms
 
-def get_bioclip():
-    """function that returns frozen bioclip model
+def get_DINO():
+    """function that returns frozen DINO model
 
     model: bioclip
     """
-    # bioclip = create_model("hf-hub:imageomics/bioclip-2", output_dict=True, require_pretrained=True).cuda()
-    bioclip, _, preprocess = create_model_and_transforms(
-        "hf-hub:imageomics/bioclip-2", output_dict=True, require_pretrained=True
-    )
-    bioclip = bioclip.cuda()
-    return bioclip, preprocess
+    model = AutoModel.from_pretrained("facebook/dinov2-base")
+    model = model.cuda()
+    processor = AutoImageProcessor.from_pretrained("facebook/dinov2-base")
+    return model, processor
 
-class BioClip2_DeepRegressor(nn.Module):
+class DINO_DeepRegressor(nn.Module):
     def __init__(
-        self,
-        bioclip,
-        num_features=768,
-        hidden_size_begin=512,
-        hidden_layer_decrease_factor=4,
-        num_outputs=3,
+        self, dino, hidden_size_begin=512, hidden_layer_decrease_factor=4, num_outputs=3
     ):
         super().__init__()
         # regressor linear layer
-        self.bioclip = bioclip
+        self.dino = dino
+        self.tokens_to_linear = nn.Sequential(
+            nn.Conv2d(
+                in_channels=768, out_channels=768, kernel_size=5, padding=0, stride=1
+            ),  # Bx768x16x16 -> Bx768x12x12
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=768, out_channels=1024, kernel_size=12, stride=1, padding=0
+            ),  # -> Bx1024x1x1
+            nn.ReLU(),
+        )
         self.regressor = nn.Sequential(
-            # 768 = num features output from bioclip
-            nn.Linear(in_features=num_features, out_features=hidden_size_begin),
+            nn.Linear(in_features=1024, out_features=hidden_size_begin),
             nn.GELU(),
             nn.Linear(
                 in_features=hidden_size_begin,
@@ -54,7 +56,12 @@ class BioClip2_DeepRegressor(nn.Module):
         )
 
     def forward(self, x):
-        return self.regressor(self.bioclip(x)["image_features"])
+        features = self.dino(x)[0][:, 1:]
+        # adjust features so Bx256x768 -> B x 768 x 16x16 so that positional data can be conserved(hopefully)?
+        transposed_patches = features.transpose(1, 2)  # -> Bx768x256
+        unflat = transposed_patches.unflatten(dim=2, sizes=(16, 16))  # -> B x768x16x16
+
+        return self.regressor(self.tokens_to_linear(unflat).squeeze())
 
 class Model:
     def __init__(self):
@@ -63,16 +70,16 @@ class Model:
         self.transforms = None
 
     def load(self):
-        bioclip, transforms = get_bioclip()
-        self.transforms = transforms
+        dino, processor = get_DINO()
+        self.processor = processor
         model_path = os.path.join(os.path.dirname(__file__), "model.pth")
-        self.model = BioClip2_DeepRegressor(bioclip=bioclip)
+        self.model = DINO_DeepRegressor(dino=dino)
         self.model.load_state_dict(torch.load(model_path))
             
 
     def predict(self, datapoints):
         images = [entry['img'] for entry in datapoints]
-        tensor_images = torch.stack([self.transforms(image) for image in images])
+        tensor_images = torch.stack([self.processor(image, return_tensors="pt")['pixel_values'][0] for image in images])
         #model outputs 30d,1y,2y
         outputs = self.model(tensor_images)
         mu = torch.mean(outputs, dim=0)

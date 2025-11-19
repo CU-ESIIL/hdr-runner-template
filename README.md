@@ -165,7 +165,6 @@ uv run python HDR-SMood-Challenge-sample/baselines/training/BioClip2/evaluation.
 ```
 
 <br>
-<br>
 
 ### Command Flags
 

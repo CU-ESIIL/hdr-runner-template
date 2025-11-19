@@ -161,7 +161,7 @@ python HDR-SMood-Challenge-sample/baselines/training/BioClip2/evaluation.py --ba
 
 with `uv` do:
 ```
-uv run python baselines/training/evaluation.py
+uv run python HDR-SMood-Challenge-sample/baselines/training/BioClip2/evaluation.py --batch_size 16 --num_workers 4
 ```
 
 <br>

@@ -226,22 +226,22 @@ jobs:
           # Upload outputs (from wherever the script saved them)
           if [ -d ${OUTPUT_DIR} ]; then
             echo "Uploading outputs from ${OUTPUT_DIR}..."
-            gocmd put -r ${OUTPUT_DIR}/* ${CYVERSE_DEST}/
+            gocmd put -r ${OUTPUT_DIR}/* ${CYVERSE_DEST}/outputs/
           else
             echo "Warning: Output directory ${OUTPUT_DIR} not found"
           fi
           
           # Upload logs
-          #if [ -d logs ]; then
-          #  echo "Uploading logs..."
-          #  gocmd put -r logs/* ${CYVERSE_DEST}/logs/
-          #fi
+          if [ -d logs ]; then
+            echo "Uploading logs..."
+            gocmd put -r logs/* ${CYVERSE_DEST}/logs/
+          fi
           
           # Upload training config for reference
-         # if [ -f training_config.json ]; then
-         #   echo "Uploading training config..."
-         #   gocmd put training_config.json ${CYVERSE_DEST}/training_config.json
-         # fi
+          if [ -f training_config.json ]; then
+            echo "Uploading training config..."
+            gocmd put training_config.json ${CYVERSE_DEST}/training_config.json
+          fi
           
           echo "✓ Upload complete!"
           

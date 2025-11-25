@@ -1,1 +1,329 @@
+# ==============================================================================
+# WORKFLOW METADATA
+# ==============================================================================
 
+name: Process Training Request
+
+# ==============================================================================
+# TRIGGERS - What events cause this workflow to run
+# ==============================================================================
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'training_config.json'
+  
+  workflow_dispatch:
+    inputs:
+      test_mode:
+        description: 'Test mode (skips actual training, just validates setup)'
+        type: boolean
+        default: false
+
+# ==============================================================================
+# JOBS
+# ==============================================================================
+
+jobs:
+  train:
+    runs-on: [self-hosted, runner-gpu]
+    timeout-minutes: 480
+    
+    concurrency:
+      group: gpu-queue
+      cancel-in-progress: false
+
+    env:
+      USER_REPO: ${{ github.repository }}
+      USER_BRANCH: ${{ github.ref_name }}
+      USER_NAME: ${{ github.actor }}
+      RUN_ID: ${{ github.run_id }}
+
+    steps:
+      # --------------------------------------------------------------------------
+      # STEP 1: Print job information
+      # --------------------------------------------------------------------------
+      - name: Job Information
+        run: |
+          echo "================================================"
+          echo "Training Request Details"
+          echo "================================================"
+          echo "User: ${USER_NAME}"
+          echo "Repository: ${USER_REPO}"
+          echo "Branch: ${USER_BRANCH}"
+          echo "Run ID: ${RUN_ID}"
+          echo "Triggered by: ${{ github.event_name }}"
+          echo "Started: $(date)"
+          echo "================================================"
+      
+      # --------------------------------------------------------------------------
+      # STEP 2: Check GPU availability
+      # --------------------------------------------------------------------------
+      - name: Check GPU Availability
+        run: |
+          nvidia-smi
+          echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-all}"
+      
+      # --------------------------------------------------------------------------
+      # STEP 3: Checkout repository code
+      # --------------------------------------------------------------------------
+      - name: Checkout Repository Code
+        uses: actions/checkout@v3
+      
+      # --------------------------------------------------------------------------
+      # STEP 4: Load training configuration from JSON file
+      # --------------------------------------------------------------------------
+      - name: Load Training Configuration
+        run: |
+          echo "================================================"
+          echo "Loading Training Configuration"
+          echo "================================================"
+          
+          # Check if config file exists
+          if [ ! -f training_config.json ]; then
+            echo "ERROR: training_config.json not found!"
+            exit 1
+          fi
+          
+          # Install jq if needed
+          if ! command -v jq &> /dev/null; then
+            echo "Installing jq..."
+            sudo apt-get update -qq
+            sudo apt-get install -y jq
+          fi
+          
+          # Display config
+          echo "Configuration file contents:"
+          cat training_config.json
+          echo ""
+          
+          # Extract parameters
+          SCRIPT_PATH=$(jq -r '.script_path // "train.py"' training_config.json)
+          BATCH_SIZE=$(jq -r '.batch_size // 32' training_config.json)
+          NUM_WORKERS=$(jq -r '.num_workers // 8' training_config.json)
+          EPOCHS=$(jq -r '.epochs // 5' training_config.json)
+          OUTPUT_DIR=$(jq -r '.output_dir // "outputs"' training_config.json)
+          
+          # Save as environment variables
+          echo "SCRIPT_PATH=${SCRIPT_PATH}" >> $GITHUB_ENV
+          echo "BATCH_SIZE=${BATCH_SIZE}" >> $GITHUB_ENV
+          echo "NUM_WORKERS=${NUM_WORKERS}" >> $GITHUB_ENV
+          echo "EPOCHS=${EPOCHS}" >> $GITHUB_ENV
+          echo "OUTPUT_DIR=${OUTPUT_DIR}" >> $GITHUB_ENV
+          
+          # Print loaded configuration
+          echo "================================================"
+          echo "Loaded Configuration:"
+          echo "  Script: ${SCRIPT_PATH}"
+          echo "  Batch Size: ${BATCH_SIZE}"
+          echo "  Num Workers: ${NUM_WORKERS}"
+          echo "  Epochs: ${EPOCHS}"
+          echo "  Output Directory: ${OUTPUT_DIR}"
+          echo "================================================"
+    
+      
+      # --------------------------------------------------------------------------
+      # STEP 6: Configure CyVerse access
+      # --------------------------------------------------------------------------
+      - name: Configure CyVerse Access
+        run: |
+          echo "Configuring CyVerse access..."
+          
+          mkdir -p ~/.irods
+          
+          cat > ~/.irods/gocmd.yaml <<EOF
+          irods_host: data.cyverse.org
+          irods_port: 1247
+          irods_zone: iplant
+          irods_user: ${{ secrets.CYVERSE_USERNAME }}
+          irods_password: ${{ secrets.CYVERSE_PASSWORD }}
+          EOF
+          
+          # Test connection
+          echo "Testing CyVerse connection..."
+          gocmd ls /iplant/home/${{ secrets.CYVERSE_USERNAME }} > /dev/null 2>&1
+          
+          if [ $? -eq 0 ]; then
+            echo "✓ CyVerse connection successful!"
+          else
+            echo "✗ CyVerse connection failed!"
+            exit 1
+          fi
+      
+      # STEP 8: Run training with uv
+      # --------------------------------------------------------------------------
+      - name: Run Training
+        run: |
+          echo "================================================"
+          echo "Starting Training"
+          echo "================================================"
+          
+          # Display training parameters
+          echo "Training Parameters:"
+          echo "  Script: ${SCRIPT_PATH}"
+          echo "  Batch Size: ${BATCH_SIZE}"
+          echo "  Num Workers: ${NUM_WORKERS}"
+          echo "  Epochs: ${EPOCHS}"
+          echo ""
+          
+          # Check if script exists
+          if [ ! -f ${SCRIPT_PATH} ]; then
+            echo "ERROR: ${SCRIPT_PATH} not found!"
+            exit 1
+          fi
+          
+          # Create a logs directory
+          mkdir -p logs
+          
+          # Run training with uv
+          # uv automatically handles:
+          #   - Creating virtual environment
+          #   - Installing dependencies from pyproject.toml
+          #   - Running the script
+          
+          uv run python ${SCRIPT_PATH} \
+            --batch_size ${BATCH_SIZE} \
+            --num_workers ${NUM_WORKERS} \
+            --epochs ${EPOCHS} \
+            2>&1 | tee logs/training_${RUN_ID}.log
+          
+          # Check if training was successful
+          if [ $? -eq 0 ]; then
+            echo ""
+            echo "================================================"
+            echo "✓ Training Completed Successfully!"
+            echo "================================================"
+          else
+            echo ""
+            echo "================================================"
+            echo "✗ Training Failed!"
+            echo "================================================"
+            exit 1
+          fi
+      
+      # --------------------------------------------------------------------------
+      # STEP 9: Upload results to CyVerse
+      # --------------------------------------------------------------------------
+      - name: Upload Results to CyVerse
+        if: always()
+        run: |
+          echo "================================================"
+          echo "Uploading Results to CyVerse"
+          echo "================================================"
+          
+          # Destination in CyVerse
+          #CYVERSE_DEST="/iplant/home/${{ secrets.CYVERSE_USERNAME }}/gpu_training_results/${USER_NAME}/${RUN_ID}"
+          CYVERSE_DEST="/iplant/home/shared/esiil/HDR_ML_challenge_2025"
+          echo "Destination: ${CYVERSE_DEST}"
+          echo ""
+          
+          # Create directory structure
+          echo "Creating directory structure..."
+          gocmd mkdir -p ${CYVERSE_DEST}
+          
+          # Upload outputs (from wherever the script saved them)
+          if [ -d ${OUTPUT_DIR} ]; then
+            echo "Uploading outputs from ${OUTPUT_DIR}..."
+            gocmd put -r ${OUTPUT_DIR}/* ${CYVERSE_DEST}/outputs/
+          else
+            echo "Warning: Output directory ${OUTPUT_DIR} not found"
+          fi
+          
+          # Upload logs
+          if [ -d logs ]; then
+            echo "Uploading logs..."
+            gocmd put -r logs/* ${CYVERSE_DEST}/logs/
+          fi
+          
+          # Upload training config for reference
+          if [ -f training_config.json ]; then
+            echo "Uploading training config..."
+            gocmd put training_config.json ${CYVERSE_DEST}/training_config.json
+          fi
+          
+          echo "✓ Upload complete!"
+          
+          # Add metadata
+          echo ""
+          echo "Adding metadata..."
+          gocmd meta add ${CYVERSE_DEST} "github_run_id" "${RUN_ID}"
+          gocmd meta add ${CYVERSE_DEST} "user" "${USER_NAME}"
+          gocmd meta add ${CYVERSE_DEST} "batch_size" "${BATCH_SIZE}"
+          gocmd meta add ${CYVERSE_DEST} "num_workers" "${NUM_WORKERS}"
+          gocmd meta add ${CYVERSE_DEST} "epochs" "${EPOCHS}"
+          gocmd meta add ${CYVERSE_DEST} "dataset" "${DATASET}"
+          gocmd meta add ${CYVERSE_DEST} "completed_at" "$(date -Iseconds)"
+          
+          # List uploaded files
+          echo ""
+          echo "Uploaded files:"
+          gocmd ls ${CYVERSE_DEST}
+          
+          echo ""
+          echo "================================================"
+          echo "✓ Results Upload Complete!"
+          echo "================================================"
+          echo "Results Location:"
+          echo "${CYVERSE_DEST}"
+          echo ""
+          echo "To download in CyVerse JupyterLab:"
+          echo "gocmd get -r ${CYVERSE_DEST} ./results/"
+          echo "================================================"
+      
+      # --------------------------------------------------------------------------
+      # STEP 10: Cleanup
+      # --------------------------------------------------------------------------
+      - name: Cleanup
+        if: always()
+        run: |
+          echo "Cleaning up..."
+          
+          # Remove credentials
+          rm -f ~/.irods/gocmd.yaml
+          
+          # Remove downloaded dataset
+          if [ -d data ]; then
+            echo "Removing downloaded dataset..."
+            rm -rf data
+          fi
+          
+          # Keep only the 5 most recent output directories
+          if [ -d ${OUTPUT_DIR} ]; then
+            cd ${OUTPUT_DIR}
+            NUM_OUTPUTS=$(ls -1 2>/dev/null | wc -l)
+            
+            if [ $NUM_OUTPUTS -gt 5 ]; then
+              echo "Cleaning up old outputs (keeping 5 most recent)..."
+              ls -t | tail -n +6 | xargs -r rm -rf
+              echo "Cleanup complete!"
+            fi
+          fi
+          
+          echo "✓ Cleanup complete!"
+      
+      # --------------------------------------------------------------------------
+      # STEP 11: Final summary
+      # --------------------------------------------------------------------------
+      - name: Training Summary
+        if: always()
+        run: |
+          echo ""
+          echo "========================================================"
+          echo "TRAINING JOB SUMMARY"
+          echo "========================================================"
+          echo "Status: ${{ job.status }}"
+          echo "Run ID: ${RUN_ID}"
+          echo "User: ${USER_NAME}"
+          echo "Script: ${SCRIPT_PATH}"
+          echo "Batch Size: ${BATCH_SIZE}"
+          echo "Num Workers: ${NUM_WORKERS}"
+          echo "Epochs: ${EPOCHS}"
+          echo "Dataset: ${DATASET}"
+          echo ""
+          echo "Results uploaded to CyVerse:"
+          echo "/iplant/home/${{ secrets.CYVERSE_USERNAME }}/gpu_training_results/${USER_NAME}/${RUN_ID}/"
+          echo ""
+          echo "Completed: $(date)"
+          echo "========================================================"

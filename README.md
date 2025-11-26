@@ -369,11 +369,8 @@ We also recommend that you include a [CITATION.cff](https://docs.github.com/en/r
 
 ---
 
-
-## Notes on Computing Resource Use
-For training a linear prob on BioCLIP, ~3 GB of GPU was used for a batch size of 64.
-
-For fine-tuning the last two layers of BioCLIP with a linear layer, ~6 GB of GPU was used for a batch size of 64
+<br>
+<br>
 
 
 

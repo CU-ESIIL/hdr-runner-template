@@ -3,5 +3,5 @@
   "epochs": 1,
   "batch_size": 32,
   "num_workers": 8,
-  "output_dir": "baselines/training/BioClip2"
+  "output_dir": "/iplant/home/jgillan/hackathon"
 }

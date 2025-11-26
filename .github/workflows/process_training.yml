@@ -227,7 +227,7 @@ jobs:
           # Upload outputs (from wherever the script saved them)
           if [ -d ${OUTPUT_DIR} ]; then
             echo "Uploading outputs from ${OUTPUT_DIR}..."
-            gocmd put -r ${OUTPUT_DIR}/model.pth ${CYVERSE_DEST}/outputs
+            gocmd put -f ${OUTPUT_DIR}/model.pth ${CYVERSE_DEST}/outputs
           else
             echo "Warning: Output directory ${OUTPUT_DIR} not found"
           fi

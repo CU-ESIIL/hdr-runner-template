@@ -216,7 +216,7 @@ jobs:
           # Destination in CyVerse
           #CYVERSE_DEST="/iplant/home/${{ secrets.CYVERSE_USERNAME }}/gpu_training_results/${USER_NAME}/${RUN_ID}"
           #CYVERSE_DEST="/iplant/home/shared/esiil/HDR_ML_challenge_2025"
-          Cyverse_DEST="/iplant/home/jgillan/hackathon"
+          Cyverse_DEST="/iplant/home/jgillan/hackathon"    /iplant/home/jgillan/hackathon/outputs
           echo "Destination: ${CYVERSE_DEST}"
           echo ""
           
@@ -227,7 +227,7 @@ jobs:
           # Upload outputs (from wherever the script saved them)
           if [ -d ${OUTPUT_DIR} ]; then
             echo "Uploading outputs from ${OUTPUT_DIR}..."
-            gocmd put -r ${OUTPUT_DIR}/* ${CYVERSE_DEST}/outputs/
+            gocmd put -r ${OUTPUT_DIR}/* ${CYVERSE_DEST}/outputs
           else
             echo "Warning: Output directory ${OUTPUT_DIR} not found"
           fi

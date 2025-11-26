@@ -139,25 +139,13 @@ jobs:
     
       
       # --------------------------------------------------------------------------
-      # STEP 6: Configure CyVerse access
+      # STEP 6: Test CyVerse access
       # --------------------------------------------------------------------------
-      - name: Configure CyVerse Access
+      - name: Test CyVerse Access
         run: |
-          echo "Configuring CyVerse access..."
-          
-          mkdir -p ~/.irods
-          
-          cat > ~/.irods/gocmd.yaml <<EOF
-          irods_host: data.cyverse.org
-          irods_port: 1247
-          irods_zone: iplant
-          irods_user: ${{ secrets.CYVERSE_USERNAME }}
-          irods_password: ${{ secrets.CYVERSE_PASSWORD }}
-          EOF
-          
           # Test connection
           echo "Testing CyVerse connection..."
-          gocmd ls /iplant/home/${{ secrets.CYVERSE_USERNAME }} > /dev/null 2>&1
+          gocmd ls /iplant/home/jkentg > /dev/null 2>&1
           
           if [ $? -eq 0 ]; then
             echo "✓ CyVerse connection successful!"

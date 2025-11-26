@@ -227,7 +227,7 @@ jobs:
           # Upload outputs (from wherever the script saved them)
           if [ -d ${OUTPUT_DIR} ]; then
             echo "Uploading outputs from ${OUTPUT_DIR}..."
-            gocmd put -r ${OUTPUT_DIR}/* ${CYVERSE_DEST}/outputs
+            gocmd put -r ${OUTPUT_DIR}/model.pth ${CYVERSE_DEST}/outputs
           else
             echo "Warning: Output directory ${OUTPUT_DIR} not found"
           fi
@@ -246,16 +246,7 @@ jobs:
           
           echo "✓ Upload complete!"
           
-          # Add metadata
-          echo ""
-          echo "Adding metadata..."
-          gocmd meta add ${CYVERSE_DEST} "github_run_id" "${RUN_ID}"
-          gocmd meta add ${CYVERSE_DEST} "user" "${USER_NAME}"
-          gocmd meta add ${CYVERSE_DEST} "batch_size" "${BATCH_SIZE}"
-          gocmd meta add ${CYVERSE_DEST} "num_workers" "${NUM_WORKERS}"
-          gocmd meta add ${CYVERSE_DEST} "epochs" "${EPOCHS}"
-          gocmd meta add ${CYVERSE_DEST} "completed_at" "$(date -Iseconds)"
-          
+
           # List uploaded files
           echo ""
           echo "Uploaded files:"

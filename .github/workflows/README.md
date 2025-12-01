@@ -15,13 +15,17 @@ Follow the prompts to connect the DE app with your Github account
 <br>
 <br>
 
-Clone the [HDR-SMood-Challenge-sample](https://github.com/jeffgillan/HDR-SMood-Challenge-sample) git repository to the jupyterlab app. 
+Clone the [HDR-SMood-Challenge-sample](https://github.com/jeffgillan/HDR-SMood-Challenge-sample) git repository to the jupyterlab app. Best practices would be to clone the repo to the directory `~/data-store`.
 
 `git clone https://github.com/jeffgillan/HDR-SMood-Challenge-sample.git`
+
+Navigate into the cloned repo directory 
 
 `cd HDR-SMood-Challenge-sample`
 
 <br>
+
+
 <br>
 <br>
 <br>

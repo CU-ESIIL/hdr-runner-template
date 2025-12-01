@@ -10,8 +10,6 @@ name: Process Training Request
 
 on:
   push:
-    branches:
-      - main
     paths:
       - 'training_config.json'
   

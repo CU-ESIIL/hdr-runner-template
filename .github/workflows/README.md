@@ -2,6 +2,8 @@
 
 The Cyverse Discovery Environment (DE) lacks in powerful GPUs needed for rapid machine learning training. To solve this problem, we have set up a `runner` on github which connects the DE to powerful GPUs VMs hosted on Jetstream2 cloud computer. 
 
+<br>
+
 ## How to use the GPU runner in Cyverse DE
 Users will likely be using the `ESIIL ML Challenge 2025` jupyterlab app in the DE. 
 

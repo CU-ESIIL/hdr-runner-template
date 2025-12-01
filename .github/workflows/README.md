@@ -15,7 +15,7 @@ Follow the prompts to connect the DE app with your Github account
 <br>
 <br>
 
-The ML code and the runner are located in the github repository Clone [HDR-SMood-Challenge-sample](https://github.com/jeffgillan/HDR-SMood-Challenge-sample) Because there will be multiple people using the runner, each user needs to have their own branch in the repository. You will be cloning and pushing on your dedicated branch, not the main branch. 
+The ML code and the runner are located in the github repository [HDR-SMood-Challenge-sample](https://github.com/jeffgillan/HDR-SMood-Challenge-sample). Because there will be multiple people using the runner, each user needs to have their own branch in the repository. You will be cloning and pushing on your dedicated branch, not the main branch. 
 
 Best practices would be to clone the repo to the directory `~/data-store`.
 

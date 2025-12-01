@@ -215,55 +215,61 @@ jobs:
           echo "================================================"
           echo "Uploading Results to CyVerse"
           echo "================================================"
-          
+
+          # Generate timestamp for unique filename
+          TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
+          MODEL_NAME="model"
+          TIMESTAMPED_MODEL="${MODEL_NAME}_${TIMESTAMP}.pth"
+
+          # Save to environment for later steps
+          echo "TIMESTAMPED_MODEL=${TIMESTAMPED_MODEL}" >> $GITHUB_ENV
+
           # Use the user-specified CyVerse destination path
           CYVERSE_DEST="${CYVERSE_OUTPUT_PATH}"
-          
-          echo "Source (local): ${OUTPUT_DIR}"
-          echo "Destination (CyVerse): ${CYVERSE_DEST}"
+
+          echo "Source (local): ${OUTPUT_DIR}/model.pth"
+          echo "Destination (CyVerse): ${CYVERSE_DEST}/${TIMESTAMPED_MODEL}"
           echo ""
-          
-          # Create directory structure
-          echo "Creating directory structure..."
-          #gocmd mkdir -p ${CYVERSE_DEST}
-          
-          # Upload outputs from the script's directory
+
+          # Upload model with timestamped filename
           if [ -d ${OUTPUT_DIR} ]; then
             echo "Uploading outputs from ${OUTPUT_DIR}..."
-            
-            # Upload all files from the output directory
-            # -f flag forces overwrite if files exist
-            # -r flag for recursive (if there are subdirectories)
-            gocmd put -f ${OUTPUT_DIR}/model.pth ${CYVERSE_DEST}/
-            
-            if [ $? -eq 0 ]; then
-              echo "✓ Outputs uploaded successfully!"
+
+            if [ -f ${OUTPUT_DIR}/model.pth ]; then
+              echo "Found model.pth, uploading as ${TIMESTAMPED_MODEL}..."
+
+              # Upload without -f flag (no overwrite needed with unique names)
+              gocmd put ${OUTPUT_DIR}/model.pth ${CYVERSE_DEST}/${TIMESTAMPED_MODEL}
+
+              if [ $? -eq 0 ]; then
+                echo "✓ Model uploaded successfully as ${TIMESTAMPED_MODEL}!"
+              else
+                echo "✗ Model upload failed!"
+                # Don't exit - allow workflow to continue
+              fi
             else
-              echo "✗ Output upload failed!"
-              # Don't exit - try to upload logs anyway
+              echo "Warning: model.pth not found in ${OUTPUT_DIR}"
             fi
           else
             echo "Warning: Output directory ${OUTPUT_DIR} not found"
           fi
-          
-          
+
           echo "✓ Upload complete!"
-          
 
           # List uploaded files
           echo ""
-          echo "Uploaded files:"
+          echo "Files in ${CYVERSE_DEST}:"
           gocmd ls ${CYVERSE_DEST}
-          
+
           echo ""
           echo "================================================"
           echo "✓ Results Upload Complete!"
           echo "================================================"
-          echo "Results Location:"
-          echo "${CYVERSE_DEST}"
+          echo "Model Location:"
+          echo "${CYVERSE_DEST}/${TIMESTAMPED_MODEL}"
           echo ""
           echo "To download in CyVerse JupyterLab:"
-          echo "gocmd get -r ${CYVERSE_DEST} ./results/"
+          echo "gocmd get ${CYVERSE_DEST}/${TIMESTAMPED_MODEL} ./model.pth"
           echo "================================================"
       
       # --------------------------------------------------------------------------
@@ -272,29 +278,32 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
-          echo "Cleaning up..."
-          
-          # Remove credentials
+          echo "================================================"
+          echo "Cleaning Up Runner Workspace"
+          echo "================================================"
+
+          # Remove CyVerse credentials (security)
+          echo "Removing CyVerse credentials..."
           rm -f ~/.irods/gocmd.yaml
-          
-          # Remove downloaded dataset
-          if [ -d data ]; then
-            echo "Removing downloaded dataset..."
-            rm -rf data
+
+          # Remove HuggingFace cache (can be very large)
+          if [ -d ~/.cache/huggingface ]; then
+            echo "Removing HuggingFace cache..."
+            du -sh ~/.cache/huggingface
+            rm -rf ~/.cache/huggingface
+            echo "✓ HuggingFace cache removed"
           fi
-          
-          # Keep only the 5 most recent output directories
-          if [ -d ${OUTPUT_DIR} ]; then
-            cd ${OUTPUT_DIR}
-            NUM_OUTPUTS=$(ls -1 2>/dev/null | wc -l)
-            
-            if [ $NUM_OUTPUTS -gt 5 ]; then
-              echo "Cleaning up old outputs (keeping 5 most recent)..."
-              ls -t | tail -n +6 | xargs -r rm -rf
-              echo "Cleanup complete!"
-            fi
-          fi
-          
+
+          # GitHub Actions automatically cleans up the workspace, but for
+          # self-hosted runners, we can explicitly clean up if needed
+          # Note: This runs in the repo directory, so we need to go up first
+          echo "Current directory: $(pwd)"
+
+          # Optional: Remove the checked out repository clone
+          # Uncomment if you want explicit cleanup (normally Actions handles this)
+          # cd ..
+          # rm -rf HDR-SMood-Challenge-sample
+
           echo "✓ Cleanup complete!"
       
       # --------------------------------------------------------------------------
@@ -314,8 +323,8 @@ jobs:
           echo "Batch Size: ${BATCH_SIZE}"
           echo "Num Workers: ${NUM_WORKERS}"
           echo "Epochs: ${EPOCHS}"
-          echo "Results uploaded to CyVerse:"
-          echo "${CYVERSE_OUTPUT_PATH}"
+          echo "Model uploaded to CyVerse:"
+          echo "${CYVERSE_OUTPUT_PATH}/${TIMESTAMPED_MODEL}"
           echo ""
           echo "Completed: $(date)"
           echo "========================================================"

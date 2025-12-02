@@ -30,7 +30,7 @@ jobs:
     timeout-minutes: 1000
     
     concurrency:
-      group: gpu-queue-${{ github.run_id % 2 }}  # Creates 2 queues (0 and 1)
+      group: gpu-queue
       cancel-in-progress: false
 
     env:

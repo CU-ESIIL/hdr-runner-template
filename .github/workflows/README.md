@@ -127,5 +127,6 @@ Move gocmds to the system Path `sudo mv gocmd /usr/local/bin`
 
 `gocmd init`
  
-
+## Install uv
+`curl -LsSf https://astral.sh/uv/install.sh | sh`
 

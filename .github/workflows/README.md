@@ -35,6 +35,7 @@ Clone using the Git Widget:
 
 <br>
 <br>
+<br>
 
 In the root of the repo is a file `training_config.json` which contains the parameters of your training run. 
 
@@ -68,7 +69,7 @@ In the Cyverse Datastore, create a directory in your personal account. This dire
 
 **!!Important!!** You need to share (write access) your 'cyverse_output_path' directory with the username `jkentg`. This is very important, otherwise the model weights will not be delivered to your output directory. 
 
-<img width="605" height="167" alt="Screenshot 2025-12-03 at 8 28 44 AM" src="https://github.com/user-attachments/assets/58b542bd-65b3-4aad-a8c6-d47f37ba0938" />
+<img width="405" height="167" alt="Screenshot 2025-12-03 at 8 28 44 AM" src="https://github.com/user-attachments/assets/58b542bd-65b3-4aad-a8c6-d47f37ba0938" />
 
 
 <br>
@@ -91,6 +92,8 @@ Using the Git Widgit:
 
 <img width="187" height="489" alt="Screenshot 2025-12-03 at 8 22 03 AM" src="https://github.com/user-attachments/assets/0323f78e-0966-49e3-90cd-e5c2a96da1be" />
 
+<br>
+<br>
 
 ### Monitoring the Workflow
 Once you have submitted a GPU training run (through a change and push of `training_config.json`) you can monitor the training run by going to [Actions Tab in the Github Repository](https://github.com/jeffgillan/HDR-SMood-Challenge-sample/actions). 

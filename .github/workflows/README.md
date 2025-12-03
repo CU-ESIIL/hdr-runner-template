@@ -92,6 +92,14 @@ Once you have submitted a GPU training run (through a change and push of `traini
 
 The workflow should have deposited the output model weights file `model_<data/time stamp>.pth` into the directory "cyverse_output_path". 
 
+You can transfer the model.pth files back to your jupyterlab working directory by typing:
+
+`cp /iplant/home/<cyverser-username>/hackathon/model_<data/time stamp>.pth ~/data-store/HDR-SMood-Challenge-sample`
+
+<br>
+<br>
+<br>
+<br>
 <br>
 <br>
 <br>

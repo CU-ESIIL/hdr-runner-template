@@ -1,7 +1,7 @@
 {
   "script_path": "baselines/training/BioClip2/train.py",
-  "epochs": 2,
+  "epochs": 100,
   "batch_size": 32,
   "num_workers": 8,
-  "cyverse_output_path": "/iplant/home/jgillan/hackathon"
+  "cyverse_output_path": "/iplant/home/esokol/ESIIL_hackathon_testing/20251204_1104_runner"
 }

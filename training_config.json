@@ -3,5 +3,5 @@
   "epochs": 100,
   "batch_size": 32,
   "num_workers": 8,
-  "cyverse_output_path": "/iplant/home/esokol/ESIIL_hackathon_testing/20251204_1104_runner"
+  "cyverse_output_path": "/iplant/home/esokol/ESIIL_hackathon_testing/20251204_1424_runner/"
 }

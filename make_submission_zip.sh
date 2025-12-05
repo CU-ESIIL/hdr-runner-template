@@ -1,24 +1,24 @@
 # Script to bundle model + requirements into a submission zip
 # Prior to running this script, in bash, run 
-#   `chmod +x make_submission_zip.sh`
+#   `chmod +x ~/data-store/HDR-SMood-Challenge-sample/make_submission_zip.sh`
 # to make it executable. Then run it with
-#   `./make_submission_zip.sh`
+#   `~/data-store/HDR-SMood-Challenge-sample/make_submission_zip.sh`
 
 #!/usr/bin/env bash
 set -euo pipefail
 
 # ---- User-configurable paths ----
 
-# Where you want the final zip to be written
-my_write_path=~/data-store/home/esokol/ESIIL_hackathon_testing/
+# Where you want the final zip to be written (default is current dir)
+my_write_path=./
 
 # Name of the zip file (no path, just filename)
-my_zip_filename=submission_20251204_1424_runner.zip
+my_zip_filename=zip_submission.zip
 
 # Paths to the three files that must go into the zip
 my_path_to_requirements=~/data-store/HDR-SMood-Challenge-sample/baselines/submissions/BioClip2/requirements.txt
 my_path_to_model=~/data-store/HDR-SMood-Challenge-sample/baselines/submissions/BioClip2/model.py
-my_path_to_weights=~/data-store/home/esokol/ESIIL_hackathon_testing/20251204_1424_runner/model_2025-12-04_21-43-34.pth
+my_path_to_weights=model_2025-12-05_03-04-15.pth
 
 # ---- Basic sanity checks ----
 

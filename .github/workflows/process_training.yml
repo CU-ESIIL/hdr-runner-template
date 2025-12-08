@@ -135,9 +135,13 @@ jobs:
           echo "  CyVerse Destination: ${CYVERSE_OUTPUT_PATH}"
           echo "================================================"
     
-      
+          # Generate single timestamp for this entire job
+          TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
+          echo "TIMESTAMP=${TIMESTAMP}" >> $GITHUB_ENV
+          echo "Job timestamp: ${TIMESTAMP}"
+          
       # --------------------------------------------------------------------------
-      # STEP 6: Test CyVerse access
+      # STEP 5: Test CyVerse access
       # --------------------------------------------------------------------------
       - name: Test CyVerse Access
         run: |
@@ -152,7 +156,7 @@ jobs:
             exit 1
           fi
       
-      # STEP 8: Run training with uv
+      # STEP 6: Run training with uv
       # --------------------------------------------------------------------------
       - name: Run Training
         run: |
@@ -203,9 +207,77 @@ jobs:
             echo "================================================"
             exit 1
           fi
-      
+
       # --------------------------------------------------------------------------
-      # STEP 9: Upload results to CyVerse
+      # STEP 7: Create Training Summary File
+      # --------------------------------------------------------------------------
+      - name: Create Training Summary File
+        if: always()
+        run: |
+          echo "Creating training summary file..."
+    
+          # Generate timestamp for the summary filename
+          SUMMARY_FILE="training_summary_${TIMESTAMP}.txt"
+    
+          # Create the summary file
+          cat > ${SUMMARY_FILE} <<EOF
+      ======================================================
+      TRAINING JOB SUMMARY
+      ======================================================
+      Status: ${{ job.status }}
+      Run ID: ${RUN_ID}
+      User: ${USER_NAME}
+      Repository: ${USER_REPO}
+      Branch: ${USER_BRANCH}
+
+      ======================================================
+      TRAINING CONFIGURATION
+      ======================================================
+      Script: ${SCRIPT_PATH}
+      Batch Size: ${BATCH_SIZE}
+      Num Workers: ${NUM_WORKERS}
+      Epochs: ${EPOCHS}
+      Output Directory: ${OUTPUT_DIR}
+
+      ======================================================
+      CYVERSE UPLOAD INFORMATION
+      ======================================================
+      CyVerse Destination: ${CYVERSE_OUTPUT_PATH}
+      Model File: Will be named with timestamp suffix
+
+      ======================================================
+      TIMING INFORMATION
+      ======================================================
+      Started: ${TIMESTAMP}
+      Completed: $(date)
+
+      ======================================================
+      GPU INFORMATION
+      ======================================================
+      $(nvidia-smi --query-gpu=name,memory.total,memory.used --format=csv,noheader)
+
+      ======================================================
+      NOTES
+      ======================================================
+      This training job was executed on a self-hosted runner
+      with GPU acceleration. Results have been uploaded to
+      the specified CyVerse DataStore location.
+      ======================================================
+      EOF
+
+          echo "✓ Summary file created: ${SUMMARY_FILE}"
+    
+          # Save filename for upload step
+          echo "SUMMARY_FILE=${SUMMARY_FILE}" >> $GITHUB_ENV
+    
+          # Display the summary
+          echo ""
+          echo "Summary file contents:"
+          cat ${SUMMARY_FILE}
+
+    
+      # --------------------------------------------------------------------------
+      # STEP 8: Upload results to CyVerse
       # --------------------------------------------------------------------------
       - name: Upload Results to CyVerse
         if: always()
@@ -215,7 +287,6 @@ jobs:
           echo "================================================"
 
           # Generate timestamp for unique filename
-          TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
           MODEL_NAME="model"
           TIMESTAMPED_MODEL="${MODEL_NAME}_${TIMESTAMP}.pth"
 
@@ -252,6 +323,21 @@ jobs:
             echo "Warning: Output directory ${OUTPUT_DIR} not found"
           fi
 
+          # Upload training summary file
+          if [ -f ${SUMMARY_FILE} ]; then
+            echo ""
+            echo "Uploading training summary file..."
+            gocmd put ${SUMMARY_FILE} ${CYVERSE_DEST}/${SUMMARY_FILE}
+      
+            if [ $? -eq 0 ]; then
+              echo "✓ Summary file uploaded successfully as ${SUMMARY_FILE}!"
+            else
+              echo "✗ Summary file upload failed!"
+            fi
+          else
+            echo "Warning: Summary file not found"
+          fi
+
           echo "✓ Upload complete!"
 
           # List uploaded files
@@ -266,12 +352,17 @@ jobs:
           echo "Model Location:"
           echo "${CYVERSE_DEST}/${TIMESTAMPED_MODEL}"
           echo ""
+          echo "Summary Location:"
+          echo "${CYVERSE_DEST}/${SUMMARY_FILE}"
+          echo ""
           echo "To download in CyVerse JupyterLab:"
           echo "gocmd get ${CYVERSE_DEST}/${TIMESTAMPED_MODEL} ./model.pth"
+          echo "gocmd get ${CYVERSE_DEST}/${SUMMARY_FILE} ./summary.txt"
           echo "================================================"
+          
       
       # --------------------------------------------------------------------------
-      # STEP 10: Cleanup
+      # STEP 9: Cleanup
       # --------------------------------------------------------------------------
       - name: Cleanup
         if: always()
@@ -305,7 +396,7 @@ jobs:
           echo "✓ Cleanup complete!"
       
       # --------------------------------------------------------------------------
-      # STEP 11: Final summary
+      # STEP 10: Final summary
       # --------------------------------------------------------------------------
       - name: Training Summary
         if: always()

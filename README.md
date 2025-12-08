@@ -91,7 +91,7 @@ The computing infrastructure for this ML challenge is provided by [Cyverse](http
 
 ## Training
 
-If you are running the scripts within the `ESIIL ML Challenge 2025` Cyverse app, all the software has already been installed:
+If you are running the scripts within the [`ESIIL ML Challenge 2025`](https://de.cyverse.org/apps/de/165baf1e-be83-11f0-bf87-008cfa5ae621) Cyverse app, all the software has already been installed:
 
 ```
 python HDR-SMood-Challenge-sample/baselines/training/BioClip2/train.py --batch_size 16 --num_workers 4 --epochs 100

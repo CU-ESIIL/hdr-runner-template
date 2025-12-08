@@ -83,7 +83,7 @@ More information on the dataset [here](https://www.codabench.org/competitions/98
 
 ## Computing Infrastructure
 
-The computing infrastructure for this ML challenge is provided by [Cyverse](https://user.cyverse.org/) at the University of Arizona. The infrastructure includes cloud Data Storage, cloud computing containerized apps (e.g., jupyter notebook), and access to a powerful GPU machine hosted on the [Jetstream2](/.github/workflows) cloud. 
+The computing infrastructure for this ML challenge is provided by [Cyverse](https://user.cyverse.org/) at the University of Arizona. The infrastructure includes cloud Data Storage, cloud computing Jupyter Notebook app [ESIIL ML Challenge 2025](https://de.cyverse.org/apps/de/165baf1e-be83-11f0-bf87-008cfa5ae621), and access to a powerful GPU machine hosted on the [Jetstream2](/.github/workflows) cloud. 
 
 
 <br>

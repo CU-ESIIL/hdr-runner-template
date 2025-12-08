@@ -220,7 +220,7 @@ jobs:
           SUMMARY_FILE="training_summary_${TIMESTAMP}.txt"
     
           # Create the summary file
-          cat > ${SUMMARY_FILE} <<EOF
+          cat > ${SUMMARY_FILE} <<'EOF'
 ======================================================
 TRAINING JOB SUMMARY
 ======================================================

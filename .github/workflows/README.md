@@ -19,12 +19,12 @@ The Cyverse Discovery Environment (DE) lacks in powerful GPUs needed for rapid m
 
 
 ### 1. Launch a Cyverse App
-Users will likely be using the `ESIIL ML Challenge 2025` jupyterlab app in the DE. 
+Users will likely be using the [`ESIIL ML Challenge 2025`](https://de.cyverse.org//apps/de/165baf1e-be83-11f0-bf87-008cfa5ae621) jupyterlab app in the DE. 
 
 <br>
 <br>
 
-### 2. Authenticate with Gihhub
+### 2. Authenticate with Github
 In the terminal of jupyterlab, authenticate to github by typing:
 
 `gh auth login` 
@@ -119,10 +119,13 @@ Using the Git Widgit:
 <br>
 
 ### 8. Monitoring the Workflow
-Once you have submitted a GPU training run (through a change and push of `training_config.json`) you can monitor the training run by going to [Actions Tab in the Github Repository](https://github.com/jeffgillan/HDR-SMood-Challenge-sample/actions). 
+Once you have submitted a GPU training run (through a change and push of `training_config.json`) you can monitor the training run by going to [Actions Tab in the Github Repository](https://github.com/jeffgillan/HDR-SMood-Challenge-sample/actions). Once on the Actions pages, you can click on the running workflow and see the real-time output of the process!
+
+<img width="801" height="520" alt="Screenshot from 2025-12-08 12-12-10" src="https://github.com/user-attachments/assets/2f3eb4d5-72b9-4ba2-b3b7-f259baae2b21" />
 
 <br>
 <br>
+<img width="736" height="900" alt="Screenshot from 2025-12-08 12-12-59" src="https://github.com/user-attachments/assets/55658793-e7f3-469b-b0d7-254feda532ff" />
 
 ### 9. Results
 
@@ -180,4 +183,9 @@ Move gocmds to the system Path `sudo mv gocmd /usr/local/bin`
  
 ## Install uv
 `curl -LsSf https://astral.sh/uv/install.sh | sh`
+
+## Resource Use
+
+Shows GPU compute utilization % and memory
+`watch -n 1 'nvidia-smi --query-gpu=utilization.gpu,utilization.memory,memory.used,memory.total --format=csv'`
 

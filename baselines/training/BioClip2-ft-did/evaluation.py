@@ -3,6 +3,7 @@ from pathlib import Path
 
 import torch
 from torch.utils.data import DataLoader
+import torchvision.transforms as T
 import numpy as np
 from tqdm import tqdm
 from datasets import load_dataset

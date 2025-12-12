@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+import torchvision.transformsa as T
 from tqdm import tqdm
 import numpy as np
 from datasets import load_dataset
@@ -119,15 +120,47 @@ def main():
     
     # load bioclip and model
     bioclip, transforms = get_bioclip()
+    
+    train_transforms = make_train_transform(transforms)
+    val_transforms = transforms        
+    
     model = BioClip2_DeepFeatureRegressorWithDomainID(bioclip, n_last_trainable_resblocks=args.n_last_trainable_blocks, known_domain_ids=known_domain_ids).cuda()
     
     # Transform images for model input
     def dset_transforms(examples):
         examples["pixel_values"] = [transforms(img.convert("RGB")) for img in examples["file_path"]]
         return examples
+
+    train_ds = load_dataset(
+        "imageomics/sentinel-beetles",
+        token=args.hf_token,
+        split="train",
+    )
+    val_ds = load_dataset(
+        "imageomics/sentinel-beetles",
+        token=args.hf_token,
+        split="validation",
+    )
+
+    # transform images for model input (train uses augs, val does not)
+    def train_dset_transforms(examples):
+        examples["pixel_values"] = [
+            train_transforms(img.convert("RGB")) for img in examples["file_path"]
+        ]
+        return examples
     
-    train_dset = ds["train"].with_transform(dset_transforms)
-    val_dset = ds["validation"].with_transform(dset_transforms)
+    def val_dset_transforms(examples):
+        examples["pixel_values"] = [
+            val_transforms(img.convert("RGB")) for img in examples["file_path"]
+        ]
+        return examples
+
+    train_dset = train_ds.with_transform(train_dset_transforms)
+    val_dset   = val_ds.with_transform(val_dset_transforms)
+
+    
+    #train_dset = ds["train"].with_transform(dset_transforms)
+    #val_dset = ds["validation"].with_transform(dset_transforms)
     
     dataloaders = []
     for i, dset in enumerate([train_dset, val_dset]):

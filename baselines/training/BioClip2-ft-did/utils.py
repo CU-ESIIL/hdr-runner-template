@@ -10,6 +10,16 @@ from sklearn.metrics import r2_score
 from open_clip import create_model_and_transforms
 
 
+def make_train_transform(base_transform):
+    return T.Compose([
+        T.RandomResizedCrop(224, scale=(0.4, 1.0)),
+        T.RandomHorizontalFlip(),
+        T.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.2, hue=0.05),
+        T.RandomGrayscale(p=0.1),
+        T.GaussianBlur(kernel_size=7, sigma=(0.1, 2.0)),
+        base_transform,
+    ])
+
 def get_collate_fn(other_columns=None):
     def collate_fn(batch):
         pixel_values = torch.stack([example["pixel_values"] for example in batch])

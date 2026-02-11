@@ -389,7 +389,7 @@ jobs:
           # Optional: Remove the checked out repository clone
           # Uncomment if you want explicit cleanup (normally Actions handles this)
           # cd ..
-          # rm -rf HDR-SMood-Challenge-sample
+          # rm -rf hdr-runner-template
 
           echo "✓ Cleanup complete!"
       

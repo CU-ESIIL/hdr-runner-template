@@ -1,8 +1,5 @@
 
-
 <img width="1038" height="303" alt="Screenshot 2025-12-04 at 8 48 26 PM" src="https://github.com/user-attachments/assets/c7c8885e-cc42-44ae-b083-e8739dbc73fd" />
-
-
 
 # Jetstream2 Runner
 
@@ -14,8 +11,6 @@ The Cyverse Discovery Environment (DE) lacks in powerful GPUs needed for rapid m
 ## How to use the GPU runner in Cyverse DE
 
 <img width="1038" height="266" alt="Screenshot 2025-12-04 at 8 48 50 PM" src="https://github.com/user-attachments/assets/01abd8f1-d20d-488f-b298-21a5980cb03a" />
-
-
 
 
 ### 1. Launch a Cyverse App
@@ -35,9 +30,18 @@ Follow the prompts to connect the DE app with your Github account
 <br>
 
 ### 3. Clone the Repository to the Cyverse App
+
 The ML code and the runner are located in the github repository [HDR-SMood-Challenge-sample](https://github.com/jeffgillan/HDR-SMood-Challenge-sample). Because there will be multiple people using the runner, each user needs to have their own branch in the repository. You will be cloning and pushing on your dedicated branch, **not the main branch**. Best practices would be to clone the repo to the directory `~/data-store`.
 
 Clone using the Terminal:
+
+`gh repo clone cu-esiil/hdr-runner-template`
+
+<br>
+
+or
+
+<br>
 
 `git clone --branch <branch-name> https://github.com/jeffgillan/HDR-SMood-Challenge-sample.git`
 
@@ -52,8 +56,23 @@ Clone using the Git Widget:
 <br>
 <br>
 
-### 4. Edit the Config File
+### 4. Create the `/hackathon` folder in your personal profile
+
+Inside the Jupyter lab you are working on a virtual machine. We need to add the `hackathon/` folder to your personal private CyVerse Data Store,
+
+You can do this in the DE, or ESIIL Portal, or in the CLI
+
+In DE, go to [https://de.cyverse.org/data](https://de.cyverse.org/data/) and click `+Folder`
+
+In the Terminal CLI, type `mkdir /data-store/iplant/home/<username>/hackathon`
+
+### 5. Edit the Config File
+
 In the root of the repo is a file `training_config.json` which contains the parameters of your training run. 
+
+`cd hdr-runnter-template`
+
+modify the `training_config.json`: 
 
 ```
 {
@@ -70,7 +89,8 @@ In order to request the GPU runner, you will make some kind of change in the `tr
 <br>
 
 #### Editing the 'training_config.json' file
-Using the terminal, you can open a document editor by typing `nano training_config.json`. Make edits then save the file by pressing crtl+s.
+
+Using the terminal or Jupyter navigation bar, you can open a document editor. Make edits to `training_config.json` then save the file by pressing crtl+s.
 
 Alternatively, you can edit the json file by right clicking on the file >>> Open With >>> Editor
 
@@ -80,14 +100,14 @@ Alternatively, you can edit the json file by right clicking on the file >>> Open
 <br>
 <br>
 
-### 5. Create Output Folder in Cyverse Datastore
+### 6. Create Output Folder in Cyverse Datastore
 
 In the Cyverse Datastore, create a directory in your personal account. This directory will be the path for 'cyverse_output_path'. 
 
 <br>
 <br>
 
-### 6. Share the Output Folder 
+### 7. Share the Output Folder 
 **!!Important!!** You need to share (write access) your 'cyverse_output_path' directory with the username `jkentg`. This is very important, otherwise the model weights will not be delivered to your output directory. 
 
 <img width="464" height="405" alt="Screenshot 2025-12-03 at 8 26 32 AM" src="https://github.com/user-attachments/assets/a241c32d-4104-4907-a3c2-77a5679a4c5c" />
@@ -98,7 +118,7 @@ In the Cyverse Datastore, create a directory in your personal account. This dire
 <br>
 <br>
 
-### 7. Push changes to your branch of the github repository
+### 8. Push changes to your branch of the github repository
 
 Using the terminal:
 
@@ -118,7 +138,7 @@ Using the Git Widgit:
 <br>
 <br>
 
-### 8. Monitoring the Workflow
+### 9. Monitoring the Workflow
 Once you have submitted a GPU training run (through a change and push of `training_config.json`) you can monitor the training run by going to [Actions Tab in the Github Repository](https://github.com/jeffgillan/HDR-SMood-Challenge-sample/actions). Once on the Actions pages, you can click on the running workflow and see the real-time output of the process!
 
 <img width="801" height="520" alt="Screenshot from 2025-12-08 12-12-10" src="https://github.com/user-attachments/assets/2f3eb4d5-72b9-4ba2-b3b7-f259baae2b21" />
@@ -127,7 +147,7 @@ Once you have submitted a GPU training run (through a change and push of `traini
 <br>
 <img width="736" height="900" alt="Screenshot from 2025-12-08 12-12-59" src="https://github.com/user-attachments/assets/55658793-e7f3-469b-b0d7-254feda532ff" />
 
-### 9. Results
+### 10. Results
 
 The workflow should have deposited the output model weights file `model_<data/time stamp>.pth` into the directory "cyverse_output_path". 
 

@@ -31,11 +31,21 @@ Follow the prompts to connect the DE app with your Github account
 
 ### 3. Clone the Repository to the Cyverse App
 
-The ML code and the runner are located in the github repository [HDR-SMood-Challenge-sample](https://github.com/jeffgillan/HDR-SMood-Challenge-sample). Because there will be multiple people using the runner, each user needs to have their own branch in the repository. You will be cloning and pushing on your dedicated branch, **not the main branch**. Best practices would be to clone the repo to the directory `~/data-store`.
+The ML code and the runner are located in the github repository [hdr-runner-template](https://github.com/cu-esiil/hdr-runner-template/). Because there will be multiple people using the runner, each user needs to have their own branch in the repository. You will be cloning and pushing on your dedicated branch, **not the main branch**. Best practices would be to clone the repo to the directory `~/data-store`.
 
 Clone using the Terminal:
 
 `gh repo clone cu-esiil/hdr-runner-template`
+
+change directory
+
+`cd hdr-runner-template`
+
+Create a new branch:
+
+`git branch <new-branch-name>`
+
+`git switch <new-branch-name>`
 
 <br>
 
@@ -43,7 +53,7 @@ or
 
 <br>
 
-`git clone --branch <branch-name> https://github.com/jeffgillan/HDR-SMood-Challenge-sample.git`
+`git clone --branch <branch-name> https://github.com/cu-esiil/hdr-runner-template.git`
 
 <br>
 
@@ -100,14 +110,10 @@ Alternatively, you can edit the json file by right clicking on the file >>> Open
 <br>
 <br>
 
-### 6. Create Output Folder in Cyverse Datastore
+### 6. Share Output Folder in Cyverse Datastore
 
-In the Cyverse Datastore, create a directory in your personal account. This directory will be the path for 'cyverse_output_path'. 
+In the Cyverse Datastore, create a directory in your personal account. This directory will be the path for 'cyverse_output_path' in the .json config file. 
 
-<br>
-<br>
-
-### 7. Share the Output Folder 
 **!!Important!!** You need to share (write access) your 'cyverse_output_path' directory with the username `jkentg`. This is very important, otherwise the model weights will not be delivered to your output directory. 
 
 <img width="464" height="405" alt="Screenshot 2025-12-03 at 8 26 32 AM" src="https://github.com/user-attachments/assets/a241c32d-4104-4907-a3c2-77a5679a4c5c" />
@@ -118,7 +124,7 @@ In the Cyverse Datastore, create a directory in your personal account. This dire
 <br>
 <br>
 
-### 8. Push changes to your branch of the github repository
+### 7. Push changes to your branch of the github repository
 
 Using the terminal:
 
@@ -138,7 +144,7 @@ Using the Git Widgit:
 <br>
 <br>
 
-### 9. Monitoring the Workflow
+### 8. Monitoring the Workflow
 Once you have submitted a GPU training run (through a change and push of `training_config.json`) you can monitor the training run by going to [Actions Tab in the Github Repository](https://github.com/jeffgillan/HDR-SMood-Challenge-sample/actions). Once on the Actions pages, you can click on the running workflow and see the real-time output of the process!
 
 <img width="801" height="520" alt="Screenshot from 2025-12-08 12-12-10" src="https://github.com/user-attachments/assets/2f3eb4d5-72b9-4ba2-b3b7-f259baae2b21" />
@@ -147,7 +153,7 @@ Once you have submitted a GPU training run (through a change and push of `traini
 <br>
 <img width="736" height="900" alt="Screenshot from 2025-12-08 12-12-59" src="https://github.com/user-attachments/assets/55658793-e7f3-469b-b0d7-254feda532ff" />
 
-### 10. Results
+### 9. Results
 
 The workflow should have deposited the output model weights file `model_<data/time stamp>.pth` into the directory "cyverse_output_path". 
 
